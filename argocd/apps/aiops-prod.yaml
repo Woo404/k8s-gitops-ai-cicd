@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: aiops-prod
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: aiops
+  source:
+    repoURL: https://github.com/Woo404/k8s-gitops-ai-cicd.git
+    targetRevision: main
+    path: charts/aiops-log-assistant
+    helm:
+      releaseName: aiops
+      valueFiles:
+        - ../../environments/prod/values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: aiops-prod
+  # prod: no automated sync. A human reviews the diff in Argo CD and clicks Sync
+  # (or runs `argocd app sync aiops-prod`). Promotion = PR that bumps image.tag.
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true

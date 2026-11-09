@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: aiops-dev
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: aiops
+  source:
+    repoURL: https://github.com/Woo404/k8s-gitops-ai-cicd.git
+    targetRevision: main
+    path: charts/aiops-log-assistant
+    helm:
+      releaseName: aiops
+      valueFiles:
+        - ../../environments/dev/values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: aiops-dev
+  syncPolicy:
+    # dev: auto-sync + self-heal, drift is reverted automatically
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 3
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 2m
