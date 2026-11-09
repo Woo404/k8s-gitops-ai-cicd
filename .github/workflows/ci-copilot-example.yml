@@ -1,0 +1,61 @@
+# Example: run tests, and ONLY if they fail, let ci-copilot explain the failure.
+# Report goes to the job summary and, on pull requests, as a PR comment.
+name: ci-copilot example
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  test-with-triage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements-dev.txt
+
+      - name: Tests (log captured)
+        id: tests
+        run: |
+          set -o pipefail
+          pytest -q 2>&1 | tee test.log
+
+      - name: Triage failure with ci-copilot
+        if: failure() && steps.tests.outcome == 'failure'
+        uses: ./
+        with:
+          log-file: test.log
+          # Point at a self-hosted Ollama/vLLM reachable from the runner, or leave
+          # the secret unset -> rules-only mode (no data leaves the runner).
+          llm-base-url: ${{ secrets.CI_COPILOT_LLM_BASE_URL }}
+          llm-api-key: ${{ secrets.CI_COPILOT_LLM_API_KEY || 'ollama' }}
+          output-file: ci-copilot-report.md
+
+      - name: Comment on PR
+        if: failure() && github.event_name == 'pull_request' && hashFiles('ci-copilot-report.md') != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh pr comment ${{ github.event.pull_request.number }} --body-file ci-copilot-report.md
+
+  diff-review:
+    # Advisory only: reviews the PR diff, never blocks the merge.
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: ./
+        with:
+          diff-base: origin/${{ github.base_ref }}
+          llm-base-url: ${{ secrets.CI_COPILOT_LLM_BASE_URL }}
+          output-file: diff-review.md
