@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: aiops
+  namespace: argocd
+spec:
+  description: aiops-log-assistant environments (learning reference)
+  sourceRepos:
+    - https://github.com/Woo404/k8s-gitops-ai-cicd.git
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: aiops-dev
+    - server: https://kubernetes.default.svc
+      namespace: aiops-prod
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"

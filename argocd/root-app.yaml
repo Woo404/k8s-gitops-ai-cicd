@@ -1,0 +1,19 @@
+# "App of apps": Argo CD watches argocd/apps and creates the child Applications.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: aiops-root
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/Woo404/k8s-gitops-ai-cicd.git
+    targetRevision: main
+    path: argocd/apps
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
