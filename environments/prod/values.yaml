@@ -1,0 +1,47 @@
+# "prod" profile for a home-lab / on-prem k3s cluster.
+# Pin an immutable image tag (sha-<short>) that CI pushed; bump it via PR = GitOps promotion.
+image:
+  tag: sha-REPLACE_ME
+  pullPolicy: IfNotPresent
+config:
+  LOG_LEVEL: INFO
+  LLM_BASE_URL: http://ollama.ollama.svc.cluster.local:11434/v1
+  LLM_MODEL: qwen2.5:7b
+  LLM_TIMEOUT_SECONDS: "20"
+  ENABLE_REDACTION: "true"
+  ENABLE_RULE_FALLBACK: "true"
+existingSecret: aiops-llm-secret
+resources:
+  requests:
+    cpu: 200m
+    memory: 256Mi
+  limits:
+    cpu: "1"
+    memory: 768Mi
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 6
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          topologyKey: kubernetes.io/hostname
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: aiops-log-assistant
+ingress:
+  enabled: true
+  className: traefik
+  host: aiops.lab.local
+serviceMonitor:
+  enabled: true
+  interval: 30s
+  labels:
+    release: kube-prometheus-stack
