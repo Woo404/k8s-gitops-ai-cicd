@@ -1,0 +1,16 @@
+# dev: single replica, debug logging, rule fallback allowed, no HPA
+replicaCount: 1
+image:
+  tag: latest
+  pullPolicy: Always
+config:
+  LOG_LEVEL: DEBUG
+  LLM_BASE_URL: http://ollama.ollama.svc.cluster.local:11434/v1
+  LLM_MODEL: qwen2.5:7b
+  LLM_TIMEOUT_SECONDS: "30"
+  ENABLE_REDACTION: "true"
+  ENABLE_RULE_FALLBACK: "true"
+ingress:
+  enabled: true
+  className: traefik
+  host: aiops-dev.local
