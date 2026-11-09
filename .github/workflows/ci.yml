@@ -39,7 +39,7 @@ jobs:
           curl -sSL https://github.com/yannh/kubeconform/releases/download/v0.6.7/kubeconform-linux-amd64.tar.gz \
             | tar xz -C /usr/local/bin kubeconform
       - name: Helm lint + template + kubeconform
-        run: ./scripts/validate_k8s.sh
+        run: bash scripts/validate_k8s.sh
       - uses: actions/upload-artifact@v4
         with:
           name: rendered-manifests
