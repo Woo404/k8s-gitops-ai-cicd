@@ -1,0 +1,31 @@
+---
+- name: Create argocd namespace
+  ansible.builtin.shell: |
+    set -o pipefail
+    k3s kubectl create namespace {{ argocd_bootstrap_namespace }} --dry-run=client -o yaml | k3s kubectl apply -f -
+  args:
+    executable: /bin/bash
+  register: argocd_bootstrap_ns
+  changed_when: "'created' in argocd_bootstrap_ns.stdout"
+
+- name: Install Argo CD (server-side apply, pinned version)
+  ansible.builtin.command: >
+    k3s kubectl apply -n {{ argocd_bootstrap_namespace }} --server-side --force-conflicts
+    -f {{ argocd_bootstrap_manifest_url }}
+  register: argocd_bootstrap_apply
+  changed_when: "'serverside-applied' in argocd_bootstrap_apply.stdout"
+
+- name: Wait for argocd-server rollout
+  ansible.builtin.command: k3s kubectl -n {{ argocd_bootstrap_namespace }} rollout status deploy/argocd-server --timeout=300s
+  changed_when: false
+
+- name: Copy Argo CD project + root app manifests
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/../../argocd/"
+    dest: /opt/argocd-bootstrap/
+    mode: "0644"
+
+- name: Apply AppProject and root Application
+  ansible.builtin.command: k3s kubectl apply -f /opt/argocd-bootstrap/project.yaml -f /opt/argocd-bootstrap/root-app.yaml
+  register: argocd_bootstrap_root_apply
+  changed_when: "'created' in argocd_bootstrap_root_apply.stdout or 'configured' in argocd_bootstrap_root_apply.stdout"
