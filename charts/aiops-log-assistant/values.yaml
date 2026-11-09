@@ -1,0 +1,96 @@
+# Default values. Environment overrides live in /environments/<env>/values.yaml
+replicaCount: 1
+
+image:
+  repository: ghcr.io/woo404/aiops-log-assistant
+  # Prefer an immutable tag (sha-xxxxxxx) produced by the app repo CI.
+  tag: latest
+  pullPolicy: IfNotPresent
+
+# If the GHCR package is private, create a docker-registry secret and list it here.
+imagePullSecrets: []
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext:
+  runAsNonRoot: false  # upstream image runs as root; tighten once the Dockerfile adds a USER
+  seccompProfile:
+    type: RuntimeDefault
+
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop: ["ALL"]
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8000
+
+ingress:
+  enabled: false
+  className: traefik  # k3s ships Traefik by default
+  host: aiops.local
+  tls: []
+
+# Non-secret configuration -> ConfigMap
+config:
+  LOG_LEVEL: INFO
+  LLM_BASE_URL: http://ollama.ollama.svc.cluster.local:11434/v1
+  LLM_MODEL: qwen2.5:7b
+  LLM_TIMEOUT_SECONDS: "30"
+  ENABLE_REDACTION: "true"
+  ENABLE_RULE_FALLBACK: "true"
+
+# Name of an existing Secret with LLM_API_KEY (never put the key in values files)
+existingSecret: ""
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+probes:
+  liveness:
+    path: /healthz
+    initialDelaySeconds: 10
+    periodSeconds: 15
+  readiness:
+    path: /healthz
+    initialDelaySeconds: 5
+    periodSeconds: 10
+  startup:
+    path: /healthz
+    failureThreshold: 30
+    periodSeconds: 2
+
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+podDisruptionBudget:
+  enabled: false
+  minAvailable: 1
+
+# Requires the Prometheus Operator CRDs (kube-prometheus-stack)
+serviceMonitor:
+  enabled: false
+  interval: 30s
+  labels: {}
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

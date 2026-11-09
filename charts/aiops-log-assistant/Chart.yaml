@@ -1,0 +1,10 @@
+apiVersion: v2
+name: aiops-log-assistant
+description: Helm chart for the aiops-log-assistant FastAPI service (learning reference)
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+home: https://github.com/Woo404/k8s-gitops-ai-cicd
+sources:
+  - https://github.com/Woo404/aiops-log-assistant
+keywords: [aiops, fastapi, llm, devops]
