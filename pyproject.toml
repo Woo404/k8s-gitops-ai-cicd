@@ -1,0 +1,27 @@
+[project]
+name = "ci-copilot"
+version = "0.1.0"
+description = "Learning reference: AI-assisted CI failure triage + k3s/Helm/Argo CD GitOps"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+ci-copilot = "ci_copilot.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["ci_copilot"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "UP", "B"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

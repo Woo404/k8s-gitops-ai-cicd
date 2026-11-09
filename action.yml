@@ -1,0 +1,53 @@
+name: ci-copilot
+description: AI-assisted CI failure triage - redacts secrets, asks an OpenAI-compatible LLM, falls back to rules.
+author: Woo404 (learning reference)
+inputs:
+  log-file:
+    description: Path to the captured log of the failed step
+    required: false
+    default: ""
+  diff-base:
+    description: If set (e.g. origin/main), review `git diff <base>...HEAD` instead of a log
+    required: false
+    default: ""
+  llm-base-url:
+    description: OpenAI-compatible base URL. Empty = rules only.
+    required: false
+    default: ""
+  llm-model:
+    description: Model name
+    required: false
+    default: qwen2.5:7b
+  llm-api-key:
+    description: API key (pass from secrets; never hard-code)
+    required: false
+    default: ollama
+  output-file:
+    description: Where to write the Markdown report
+    required: false
+    default: ci-copilot-report.md
+outputs:
+  report-file:
+    description: Path of the Markdown report
+    value: ${{ inputs.output-file }}
+runs:
+  using: composite
+  steps:
+    - name: Run ci-copilot
+      shell: bash
+      env:
+        CI_COPILOT_LLM_BASE_URL: ${{ inputs.llm-base-url }}
+        CI_COPILOT_LLM_MODEL: ${{ inputs.llm-model }}
+        CI_COPILOT_LLM_API_KEY: ${{ inputs.llm-api-key }}
+        CI_COPILOT_DISABLE_LLM: ${{ inputs.llm-base-url == '' && 'true' || 'false' }}
+        LOG_FILE: ${{ inputs.log-file }}
+        DIFF_BASE: ${{ inputs.diff-base }}
+        OUT: ${{ inputs.output-file }}
+      run: |
+        export PYTHONPATH="${{ github.action_path }}${PYTHONPATH:+:$PYTHONPATH}"
+        if [[ -n "$DIFF_BASE" ]]; then
+          git diff "$DIFF_BASE"...HEAD > /tmp/ci-copilot.diff
+          python3 -m ci_copilot --diff /tmp/ci-copilot.diff --output "$OUT"
+        else
+          python3 -m ci_copilot --log "$LOG_FILE" --output "$OUT"
+        fi

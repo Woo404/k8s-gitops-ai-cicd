@@ -1,0 +1,16 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+build/
+.env
+*.pem
+*.key
+kubeconfig*
+onprem/ansible/inventory.ini
+rendered/
+tools/
+.DS_Store
