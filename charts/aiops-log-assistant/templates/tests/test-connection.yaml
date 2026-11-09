@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "aiops.fullname" . }}-test-connection"
+  labels:
+    {{- include "aiops.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  restartPolicy: Never
+  containers:
+    - name: curl
+      image: curlimages/curl:8.10.1
+      args: ["-fsS", "http://{{ include "aiops.fullname" . }}:{{ .Values.service.port }}/healthz"]
