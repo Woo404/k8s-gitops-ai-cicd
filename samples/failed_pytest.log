@@ -1,0 +1,16 @@
+2026-11-09T08:01:12.0000000Z ##[group]Run pip install -r requirements-dev.txt
+2026-11-09T08:01:20.0000000Z Successfully installed pytest-8.3.3 ruff-0.7.1
+2026-11-09T08:01:20.1000000Z ##[endgroup]
+2026-11-09T08:01:21.0000000Z ##[group]Run pytest -q
+2026-11-09T08:01:22.0000000Z ==================================== ERRORS ====================================
+2026-11-09T08:01:22.0000000Z ___________________ ERROR collecting tests/test_api.py ___________________
+2026-11-09T08:01:22.0000000Z ImportError while importing test module '/home/runner/work/app/tests/test_api.py'.
+2026-11-09T08:01:22.0000000Z tests/test_api.py:3: in <module>
+2026-11-09T08:01:22.0000000Z     import httpx
+2026-11-09T08:01:22.0000000Z E   ModuleNotFoundError: No module named 'httpx'
+2026-11-09T08:01:22.0000000Z DEBUG env: PYPI_URL=https://ci-bot:S3cr3tPassw0rd@pypi.internal.example.com/simple
+2026-11-09T08:01:22.0000000Z DEBUG runner ip 10.20.30.40 contact devops@example.com
+2026-11-09T08:01:22.0000000Z =========================== short test summary info ============================
+2026-11-09T08:01:22.0000000Z ERROR tests/test_api.py
+2026-11-09T08:01:22.0000000Z !!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+2026-11-09T08:01:22.5000000Z ##[error]Process completed with exit code 2.

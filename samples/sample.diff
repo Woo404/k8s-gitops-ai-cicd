@@ -1,0 +1,14 @@
+diff --git a/charts/aiops-log-assistant/values.yaml b/charts/aiops-log-assistant/values.yaml
+--- a/charts/aiops-log-assistant/values.yaml
++++ b/charts/aiops-log-assistant/values.yaml
+@@ -20,9 +20,7 @@ resources:
+   requests:
+     cpu: 100m
+     memory: 128Mi
+-  limits:
+-    cpu: 500m
+-    memory: 512Mi
++  limits: {}
+ env:
+-  LLM_API_KEY: ""
++  LLM_API_KEY: "sk-demoFAKEdemoFAKEdemoFAKE1234"

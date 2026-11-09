@@ -1,0 +1,9 @@
+$ kubectl -n aiops-dev get pods
+NAME                                  READY   STATUS             RESTARTS   AGE
+aiops-log-assistant-6d9f7c9b8-x2k4p   0/1     ImagePullBackOff   0          3m
+$ kubectl -n aiops-dev describe pod aiops-log-assistant-6d9f7c9b8-x2k4p
+  Warning  Failed     2m (x4 over 3m)  kubelet  Failed to pull image "ghcr.io/woo404/aiops-log-assistant:sha-deadbee": rpc error: code = NotFound desc = failed to pull and unpack image: manifest unknown
+  Warning  Failed     2m (x4 over 3m)  kubelet  Error: ErrImagePull
+  Normal   BackOff    1m (x6 over 3m)  kubelet  Back-off pulling image "ghcr.io/woo404/aiops-log-assistant:sha-deadbee"
+  Warning  Failed     1m (x6 over 3m)  kubelet  Error: ImagePullBackOff
+aws_access_key_id = AKIAIOSFODNN7EXAMPLE
